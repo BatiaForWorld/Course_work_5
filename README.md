@@ -299,4 +299,3 @@ python manage.py telegram_check --chat-id <chat_id> --text "Привет, Я �
 ```
 
 Если передать только `--chat-id`, сообщение будет отправлено со стандартным текстом.
-
