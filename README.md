@@ -15,9 +15,9 @@ Backend-сервис для трекинга полезных привычек �
 
 ## Основные возможности
 
-- JWT-аутентификация (`register`, `token`, `token/refresh`);
+- JWT-аутентификация по email (`register`, `token`, `token/refresh`);
 - CRUD только для привычек владельца;
-- публичный read-only список привычек;
+- публичный read-only список привычек (требует авторизацию);
 - пагинация по 5 элементов;
 - валидаторы;
 - CORS для подключения фронтенда;
@@ -35,11 +35,9 @@ Backend-сервис для трекинга полезных привычек �
 - Celery
 - Redis
 - drf-yasg (Swagger)
-
 ---
 
 ## Быстрый старт
-
 ### 1) Установка зависимостей
 
 ```bash
@@ -47,7 +45,6 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
-
 ### 2) Настройка окружения
 
 Создайте `.env` на основе `env.example`.
@@ -104,9 +101,9 @@ celery -A config beat -l info
 
 ## Документация API
 
-- `http://127.0.0.1:8000/swagger/`
-
----
+```
+http://localhost:8000/swagger/
+```
 
 ## Аутентификация
 
@@ -127,11 +124,11 @@ Id / Chat ID и укажи его при регистрации.
 
 POST
 ```
-http://localhost/api/users/register/`
+http://localhost:8000/api/users/register/
 ```
 ```json
 {
-  "username": "user_name",
+  "email": "user@example.com",
   "password": "StrongPass123",
   "telegram_chat_id": "12345678"
 }
@@ -139,7 +136,7 @@ http://localhost/api/users/register/`
 
 Примечания:
 
-- `email` необязателен;
+- `email` обязателен и уникален;
 - `telegram_chat_id` можно передать сразу или установить позже отдельным запросом.
 - Регистрация без `telegram_chat_id` допустима: аккаунт создается, но Telegram-напоминания начнут работать только после сохранения `chat_id`.
 
@@ -147,11 +144,11 @@ http://localhost/api/users/register/`
 
 POST 
 ```
-http://localhost/api/users/token/
+http://localhost:8000/api/users/token/
 ```
 ```json
 {
-  "username": "user_name",
+  "email": "user@example.com",
   "password": "StrongPass123"
 }
 ```
@@ -162,7 +159,7 @@ http://localhost/api/users/token/
 
 PATCH 
 ```
-http://localhost/api/users/telegram-chat-id/
+http://localhost:8000/api/users/telegram-chat-id/
 ```
 ```json
 {
@@ -177,8 +174,7 @@ http://localhost/api/users/telegram-chat-id/
 POST 
 
 ```
-http://localhost/api/habits/
-
+http://localhost:8000/api/habits/
 ```
 Пример приятной привычки:
 
@@ -214,22 +210,23 @@ http://localhost/api/habits/
 GET
 
 ```
-http://localhost/api/habits/
+http://localhost:8000/api/habits/
 ```
 Пагинация: 5 элементов на страницу.
 
 ### 6) Получение/изменение/удаление привычки
 
-- GET ```http://localhost/api/habits/<id>/```
-- PATCH ```http://localhost/api/habits/<id>/```
-- DELETE ```http://localhost/api/habits/<id>/```
+- GET ```http://localhost:8000/api/habits/<id>/```
+- PATCH ```http://localhost:8000/api/habits/<id>/```
+- DELETE ```http://localhost:8000/api/habits/<id>/```
 
 ### 7) Список публичных привычек
 
 GET 
 ```
-http://localhost/api/habits/public/
+http://localhost:8000/api/habits/public/
 ```
+Требуется JWT.
 ---
 
 ## Бизнес-правила (валидаторы)
@@ -277,10 +274,10 @@ http://localhost:8000/swagger/
 ```
 
 
-### Проверка публичного списка без авторизации
+### Проверка публичного списка с авторизацией
 
 ```bash
-http://localhost:8000/api/habits/public/
+curl -H "Authorization: Bearer <access_token>" http://localhost:8000/api/habits/public/
 ```
 
 ### Проверка пагинации
