@@ -10,8 +10,8 @@ from users.models import User
 
 class HabitApiTests(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='user1', password='StrongPass123')
-        self.other_user = User.objects.create_user(username='user2', password='StrongPass123')
+        self.user = User.objects.create_user(email='user1@example.com', password='StrongPass123')
+        self.other_user = User.objects.create_user(email='user2@example.com', password='StrongPass123')
         self.client.force_authenticate(self.user)
 
     def test_create_habit_success(self):
@@ -201,5 +201,4 @@ class HabitApiTests(APITestCase):
 
         response = self.client.get(reverse('public-habit-list'))
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['count'], 1)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

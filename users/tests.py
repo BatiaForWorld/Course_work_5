@@ -9,7 +9,6 @@ class UserRegistrationTests(APITestCase):
     def test_user_registration(self):
         url = reverse("user-register")
         payload = {
-            "username": "new_user",
             "email": "new_user@example.com",
             "password": "StrongPass123",
         }
@@ -17,25 +16,21 @@ class UserRegistrationTests(APITestCase):
         response = self.client.post(url, payload, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(User.objects.filter(username="new_user").exists())
+        self.assertTrue(User.objects.filter(email="new_user@example.com").exists())
 
     def test_user_registration_without_email(self):
         url = reverse("user-register")
         payload = {
-            "username": "no_email_user",
             "password": "StrongPass123",
             "telegram_chat_id": "12345678",
         }
 
         response = self.client.post(url, payload, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        user = User.objects.get(username="no_email_user")
-        self.assertEqual(user.email, "")
-        self.assertEqual(user.telegram_chat_id, "12345678")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_update_telegram_chat_id_after_registration(self):
-        user = User.objects.create_user(username="telegram_user", password="StrongPass123")
+        user = User.objects.create_user(email="telegram_user@example.com", password="StrongPass123")
         self.client.force_authenticate(user)
 
         response = self.client.patch(

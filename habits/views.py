@@ -1,5 +1,5 @@
 from rest_framework import generics
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 
 from habits.models import Habit
 from habits.permissions import IsOwner
@@ -24,5 +24,5 @@ class HabitRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
 class PublicHabitListView(generics.ListAPIView):
     serializer_class = HabitSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     queryset = Habit.objects.filter(is_public=True)
